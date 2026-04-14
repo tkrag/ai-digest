@@ -6,11 +6,24 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-_config_path = Path(__file__).parent.parent / "config.yaml"
+_bundled_config = Path(__file__).parent.parent / "config.yaml"
+_storage_dir = Path(os.getenv("STORAGE_DIR", "/storage"))
+_storage_config = _storage_dir / "config.yaml"
 
 
 def load_config() -> dict:
-    with open(_config_path) as f:
+    if _storage_config.exists():
+        path = _storage_config
+    else:
+        path = _bundled_config
+        # Seed storage with the bundled default so it can be edited in place
+        try:
+            _storage_dir.mkdir(parents=True, exist_ok=True)
+            _storage_config.write_text(_bundled_config.read_text())
+        except OSError:
+            pass  # storage not writable yet (e.g. first boot before mount)
+
+    with open(path) as f:
         return yaml.safe_load(f)
 
 
