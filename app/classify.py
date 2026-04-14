@@ -9,7 +9,14 @@ from app.search import Article
 
 logger = logging.getLogger(__name__)
 
-client = anthropic.AsyncAnthropic(api_key=ANTHROPIC_API_KEY, timeout=120.0)
+_client = None
+
+
+def _get_client() -> anthropic.AsyncAnthropic:
+    global _client
+    if _client is None:
+        _client = anthropic.AsyncAnthropic(api_key=ANTHROPIC_API_KEY, timeout=120.0)
+    return _client
 
 
 @dataclass
@@ -93,7 +100,7 @@ async def classify_articles(articles: list[Article]) -> tuple[list[ScoredArticle
     url_to_article = {a.url: a for a in articles}
 
     try:
-        response = await client.messages.create(
+        response = await _get_client().messages.create(
             model="claude-sonnet-4-20250514",
             max_tokens=4096,
             system=_build_system_prompt(),

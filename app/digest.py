@@ -4,7 +4,7 @@ import logging
 from datetime import date
 
 from app.classify import classify_articles
-from app.config import DIGESTS_DIR
+from app.config import DIGESTS_DIR, validate_config
 from app.linkding import bookmark_articles
 from app.mailer import send_digest_email
 from app.search import search_all_categories
@@ -20,6 +20,7 @@ async def run_digest() -> dict:
         return {"error": "already_running"}
 
     async with _lock:
+        validate_config()
         logger.info("Starting daily digest run")
         date_str = date.today().isoformat()
 
