@@ -1,0 +1,10 @@
+services:
+  ai-digest:
+    image: ghcr.io/tkrag/ai-digest:latest
+    ports:
+      - "80:80"
+    volumes:
+      - /storage:/storage
+    env_file:
+      - .env
+    restart: unless-stopped

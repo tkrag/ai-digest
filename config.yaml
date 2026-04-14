@@ -1,0 +1,76 @@
+categories:
+  ai-gone-bad:
+    label: "AI Gone Bad"
+    description: "Security breaches, compliance failures, bias incidents, lawsuits, AI causing real harm"
+    queries:
+      - "AI security breach OR AI data leak OR AI vulnerability exploit"
+      - "AI compliance failure OR AI lawsuit OR AI bias incident"
+    max_articles: 3
+    min_relevance: 7
+    tags: ["ai-gone-bad"]
+
+  new-tools:
+    label: "New Tools"
+    description: "New AI tools, libraries, platforms, or model releases that are genuinely useful"
+    queries:
+      - "new AI tool launch OR new AI platform release 2026"
+      - "open source AI model release OR AI developer tool"
+    max_articles: 3
+    min_relevance: 7
+    tags: ["new-tools"]
+
+  success-stories:
+    label: "Success Stories"
+    description: "AI success stories with concrete KPIs, metrics, or measurable business outcomes"
+    queries:
+      - "AI case study ROI OR AI implementation results metrics"
+      - "AI productivity gains measured OR AI cost savings quantified"
+    max_articles: 3
+    min_relevance: 7
+    tags: ["success-stories"]
+
+  ai-ecommerce:
+    label: "E-Commerce"
+    description: "AI usage specifically in D2C e-commerce: personalization, logistics, CX, marketing"
+    queries:
+      - "AI ecommerce personalization OR AI D2C retail"
+      - "AI online retail customer experience OR AI ecommerce logistics"
+    max_articles: 3
+    min_relevance: 7
+    tags: ["ai-ecommerce"]
+
+  all-star:
+    label: "All-Star"
+    description: "Doesn't fit other categories but is exceptionally relevant or important"
+    queries: []
+    max_articles: 3
+    min_relevance: 8
+    tags: ["ai-allstar"]
+
+scoring_prompt: |
+  You are an AI research curator for a CPTO at a D2C e-commerce company (yarn and crafting supplies).
+  Your job is to evaluate articles about AI and select only the most relevant, insightful ones.
+  Be highly selective. The reader is busy and only wants articles worth their time.
+
+  Scoring guidelines:
+  - 1-4: Not relevant, clickbait, or rehashed press release
+  - 5-6: Mildly interesting but not actionable or insightful
+  - 7-8: Genuinely insightful, contains real information worth reading
+  - 9-10: Must-read, significant development or breakthrough
+
+  Category-specific rules:
+  - "AI Gone Bad": Require specific incidents with real consequences, not opinion pieces about theoretical risks
+  - "New Tools": Require actual releases or launches with something you can try, not rumors or vaporware
+  - "Success Stories": REQUIRE concrete KPIs, metrics, or measurable outcomes. "We saved time" is not enough.
+  - "E-Commerce": Must be specifically about e-commerce/D2C/retail, not general business AI
+  - "All-Star": For articles scoring 8+ that don't fit the other categories but a tech leader should know about
+
+  If an article could fit multiple categories, assign it to the most specific one.
+  Prefer fewer, higher-quality articles over quantity. It is perfectly fine to return zero articles for a category.
+
+linkding:
+  digest_tag: "ai-digest"
+
+search:
+  freshness: "pd"
+  results_per_query: 10
