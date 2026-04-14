@@ -21,6 +21,13 @@ def get_env(key: str, default: str | None = None) -> str:
     return val
 
 
+def _int_env(key: str, default: str, lo: int, hi: int) -> int:
+    val = int(get_env(key, default))
+    if not lo <= val <= hi:
+        raise RuntimeError(f"{key}={val} out of range [{lo}, {hi}]")
+    return val
+
+
 CONFIG = load_config()
 
 ANTHROPIC_API_KEY = get_env("ANTHROPIC_API_KEY")
@@ -28,13 +35,13 @@ BRAVE_API_KEY = get_env("BRAVE_API_KEY")
 LINKDING_TOKEN = get_env("LINKDING_TOKEN")
 LINKDING_URL = get_env("LINKDING_URL", "https://pinboard.multiplicity.dk").rstrip("/")
 SMTP_HOST = get_env("SMTP_HOST", "blizzard.mxrouting.net")
-SMTP_PORT = int(get_env("SMTP_PORT", "587"))
+SMTP_PORT = _int_env("SMTP_PORT", "587", 1, 65535)
 SMTP_USER = get_env("SMTP_USER")
 SMTP_PASS = get_env("SMTP_PASS")
 EMAIL_TO = get_env("EMAIL_TO")
 EMAIL_FROM = get_env("EMAIL_FROM", SMTP_USER)
-DIGEST_HOUR = int(get_env("DIGEST_HOUR", "7"))
-DIGEST_MINUTE = int(get_env("DIGEST_MINUTE", "53"))
+DIGEST_HOUR = _int_env("DIGEST_HOUR", "7", 0, 23)
+DIGEST_MINUTE = _int_env("DIGEST_MINUTE", "53", 0, 59)
 
 STORAGE_DIR = Path(os.getenv("STORAGE_DIR", "/storage"))
 DIGESTS_DIR = STORAGE_DIR / "digests"

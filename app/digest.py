@@ -1,3 +1,4 @@
+import asyncio
 import json
 import logging
 from datetime import date
@@ -10,54 +11,62 @@ from app.search import search_all_categories
 
 logger = logging.getLogger(__name__)
 
+_lock = asyncio.Lock()
+
 
 async def run_digest() -> dict:
-    logger.info("Starting daily digest run")
-    date_str = date.today().isoformat()
+    if _lock.locked():
+        logger.warning("Digest already running, skipping")
+        return {"error": "already_running"}
 
-    # 1. Search
-    articles = await search_all_categories()
-    if not articles:
-        logger.warning("No articles found from search")
-        await send_digest_email([])
-        return {"date": date_str, "searched": 0, "selected": 0, "bookmarked": 0}
+    async with _lock:
+        logger.info("Starting daily digest run")
+        date_str = date.today().isoformat()
 
-    logger.info("Search returned %d articles", len(articles))
+        # 1. Search
+        articles = await search_all_categories()
+        if not articles:
+            logger.warning("No articles found from search")
+            await send_digest_email([])
+            return {"date": date_str, "searched": 0, "selected": 0, "bookmarked": 0}
 
-    # 2. Classify and rank
-    selected = await classify_articles(articles)
-    logger.info("Classification selected %d articles", len(selected))
+        logger.info("Search returned %d articles", len(articles))
 
-    # 3. Bookmark to LinkDing
-    bookmarked = await bookmark_articles(selected)
+        # 2. Classify and rank
+        selected, overview = await classify_articles(articles)
+        logger.info("Classification selected %d articles", len(selected))
 
-    # 4. Send email
-    await send_digest_email(selected)
+        # 3. Bookmark to LinkDing
+        bookmarked = await bookmark_articles(selected)
 
-    # 5. Save digest to storage
-    result = {
-        "date": date_str,
-        "searched": len(articles),
-        "selected": len(selected),
-        "bookmarked": bookmarked,
-        "articles": [
-            {
-                "url": a.url,
-                "title": a.title,
-                "summary": a.summary,
-                "category": a.category,
-                "score": a.score,
-            }
-            for a in selected
-        ],
-    }
+        # 4. Send email
+        await send_digest_email(selected, overview)
 
-    try:
-        DIGESTS_DIR.mkdir(parents=True, exist_ok=True)
-        out_path = DIGESTS_DIR / f"{date_str}.json"
-        out_path.write_text(json.dumps(result, indent=2))
-        logger.info("Digest saved to %s", out_path)
-    except Exception:
-        logger.exception("Failed to save digest to storage")
+        # 5. Save digest to storage
+        result = {
+            "date": date_str,
+            "searched": len(articles),
+            "selected": len(selected),
+            "bookmarked": bookmarked,
+            "overview": overview,
+            "articles": [
+                {
+                    "url": a.url,
+                    "title": a.title,
+                    "summary": a.summary,
+                    "category": a.category,
+                    "score": a.score,
+                }
+                for a in selected
+            ],
+        }
 
-    return result
+        try:
+            DIGESTS_DIR.mkdir(parents=True, exist_ok=True)
+            out_path = DIGESTS_DIR / f"{date_str}.json"
+            out_path.write_text(json.dumps(result, indent=2))
+            logger.info("Digest saved to %s", out_path)
+        except Exception:
+            logger.exception("Failed to save digest to storage")
+
+        return result

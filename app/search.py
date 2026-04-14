@@ -24,59 +24,41 @@ class Article:
     search_category: str
 
 
-async def search_brave(query: str, freshness: str = DEFAULT_FRESHNESS) -> list[dict]:
-    async with httpx.AsyncClient(timeout=30) as client:
-        resp = await client.get(
-            BRAVE_NEWS_URL,
-            headers={"X-Subscription-Token": BRAVE_API_KEY, "Accept": "application/json"},
-            params={"q": query, "count": RESULTS_PER_QUERY, "freshness": freshness},
-        )
-        resp.raise_for_status()
-        data = resp.json()
-    return data.get("results", [])
-
-
-async def search_category(category_key: str, category_cfg: dict) -> list[Article]:
-    articles = []
-    seen_urls = set()
-
-    for query in category_cfg.get("queries", []):
-        try:
-            results = await search_brave(query)
-        except Exception:
-            logger.exception("Brave search failed for query: %s", query)
-            continue
-
-        for r in results:
-            url = r.get("url", "")
-            if url in seen_urls:
-                continue
-            seen_urls.add(url)
-            articles.append(Article(
-                url=url,
-                title=r.get("title", ""),
-                snippet=r.get("description", ""),
-                source=r.get("meta_url", {}).get("hostname", "") if isinstance(r.get("meta_url"), dict) else "",
-                published=r.get("age", ""),
-                search_category=category_key,
-            ))
-
-    return articles
-
-
 async def search_all_categories() -> list[Article]:
     categories = CONFIG.get("categories", {})
     all_articles = []
-    seen_urls = set()
+    seen_urls: set[str] = set()
 
-    for key, cfg in categories.items():
-        if not cfg.get("queries"):
-            continue
-        cat_articles = await search_category(key, cfg)
-        for a in cat_articles:
-            if a.url not in seen_urls:
-                seen_urls.add(a.url)
-                all_articles.append(a)
+    async with httpx.AsyncClient(timeout=30) as client:
+        for key, cfg in categories.items():
+            for query in cfg.get("queries", []):
+                try:
+                    resp = await client.get(
+                        BRAVE_NEWS_URL,
+                        headers={"X-Subscription-Token": BRAVE_API_KEY, "Accept": "application/json"},
+                        params={"q": query, "count": RESULTS_PER_QUERY, "freshness": DEFAULT_FRESHNESS},
+                    )
+                    resp.raise_for_status()
+                    results = resp.json().get("results", [])
+                except Exception:
+                    logger.exception("Brave search failed for query: %s", query)
+                    continue
+
+                for r in results:
+                    url = r.get("url", "")
+                    if not url.startswith(("https://", "http://")):
+                        continue
+                    if url in seen_urls:
+                        continue
+                    seen_urls.add(url)
+                    all_articles.append(Article(
+                        url=url,
+                        title=r.get("title", ""),
+                        snippet=r.get("description", ""),
+                        source=r.get("meta_url", {}).get("hostname", "") if isinstance(r.get("meta_url"), dict) else "",
+                        published=r.get("age", ""),
+                        search_category=key,
+                    ))
 
     logger.info("Found %d unique articles across all categories", len(all_articles))
     return all_articles

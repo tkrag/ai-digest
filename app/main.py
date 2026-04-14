@@ -47,7 +47,9 @@ async def healthcheck():
 @app.get("/")
 async def index():
     jobs = scheduler.get_jobs()
-    next_run = jobs[0].next_run_time.isoformat() if jobs else None
+    next_run = None
+    if jobs and jobs[0].next_run_time:
+        next_run = jobs[0].next_run_time.isoformat()
     return {"service": "ai-digest", "next_run": next_run}
 
 
@@ -55,4 +57,6 @@ async def index():
 async def trigger_digest():
     logger.info("Manual digest trigger via /run")
     result = await run_digest()
+    if result.get("error") == "already_running":
+        return JSONResponse(result, status_code=409)
     return JSONResponse(result)

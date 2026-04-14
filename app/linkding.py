@@ -1,5 +1,6 @@
 import logging
 from datetime import date
+from urllib.parse import quote
 
 import httpx
 
@@ -50,4 +51,4 @@ async def bookmark_articles(articles: list[ScoredArticle]) -> int:
 
 def linkding_search_url(tag: str, date_str: str) -> str:
     q = f"#{tag} #digest-{date_str}"
-    return f"{LINKDING_URL}/bookmarks?q={q}"
+    return f"{LINKDING_URL}/bookmarks?q={quote(q)}"
