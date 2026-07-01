@@ -101,18 +101,18 @@ async def classify_articles(articles: list[Article]) -> tuple[list[ScoredArticle
 
     try:
         response = await _get_client().messages.create(
-            model="claude-sonnet-4-20250514",
+            model="claude-sonnet-4-6",
             max_tokens=4096,
             system=_build_system_prompt(),
             messages=[{"role": "user", "content": _build_user_prompt(articles)}],
         )
     except Exception:
         logger.exception("Claude API call failed")
-        return []
+        return [], ""
 
     if not response.content:
         logger.error("Claude returned empty response")
-        return []
+        return [], ""
 
     raw = response.content[0].text.strip()
     if raw.startswith("```"):
@@ -125,7 +125,7 @@ async def classify_articles(articles: list[Article]) -> tuple[list[ScoredArticle
         data = json.loads(raw)
     except json.JSONDecodeError:
         logger.error("Failed to parse Claude response as JSON: %s", raw[:500])
-        return []
+        return [], ""
 
     if not isinstance(data, dict) or "articles" not in data:
         logger.error("Claude response missing 'articles' key")
