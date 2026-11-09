@@ -1,4 +1,26 @@
 categories:
+  ai-anthropic:
+    label: "Anthropic & Claude"
+    description: "New features, product launches, and changes in Anthropic's Claude tooling: Claude apps, Claude Code, the Claude API/SDKs, MCP, connectors, skills, models available in Claude, pricing or plan changes"
+    queries:
+      - "Anthropic Claude new feature OR Anthropic launches Claude"
+      - "Claude Code update OR Claude Code new feature"
+      - "Claude API OR Claude Enterprise OR Model Context Protocol Anthropic"
+    max_articles: 3
+    min_relevance: 6
+    tags: ["ai-anthropic"]
+
+  ai-regulation:
+    label: "AI Regulation"
+    description: "New laws, policy proposals, enforcement actions, and official guidance around AI, especially the EU AI Act, GDPR as it applies to AI, and Danish/Nordic rules"
+    queries:
+      - "AI regulation law passed OR AI policy government"
+      - "AI act enforcement OR AI governance legislation"
+      - "EU AI Act guidance OR EU AI Act deadline OR AI Act compliance"
+    max_articles: 3
+    min_relevance: 7
+    tags: ["ai-regulation"]
+
   ai-gone-bad:
     label: "AI Gone Bad"
     description: "Security breaches, compliance failures, bias incidents, lawsuits, AI causing real harm"
@@ -10,11 +32,12 @@ categories:
     tags: ["ai-gone-bad"]
 
   new-tools:
-    label: "New Tools"
-    description: "New AI tools, libraries, platforms, or model releases that are genuinely useful"
+    label: "AI Tools"
+    description: "Newly launched or significantly updated AI tools a mid-sized company can adopt: AI governance and security tools (guardrails, observability, policy enforcement, data-loss prevention, agent permissions), AI tools for e-commerce (search, merchandising, product content, CX agents, Shopify/Klaviyo apps), and practical agent/automation tools. NOT new model releases or benchmark results"
     queries:
-      - "new AI tool launch OR new AI platform release 2026"
-      - "open source AI model release OR AI developer tool"
+      - "AI governance platform launch OR AI guardrails tool OR AI agent security tool"
+      - "AI ecommerce tool launch OR Shopify AI app OR AI merchandising tool"
+      - "AI agent observability OR AI automation platform launch OR n8n AI"
     max_articles: 3
     min_relevance: 7
     tags: ["new-tools"]
@@ -48,25 +71,69 @@ categories:
     tags: ["ai-allstar"]
 
 scoring_prompt: |
-  You are an AI research curator for a CPTO at a D2C e-commerce company (yarn and crafting supplies).
-  Your job is to evaluate articles about AI and select only the most relevant, insightful ones.
-  Be highly selective. The reader is busy and only wants articles worth their time.
+  You are an AI research curator for one reader: the CPTO of Hobbii, a Denmark-based D2C e-commerce
+  company selling yarn and crafting supplies to consumers across many European markets
+  (multi-language, multi-currency). The stack is Shopify, Klaviyo and n8n, and the company has
+  standardised on Anthropic's Claude (Claude apps, Claude Code, the API) as its preferred AI tooling.
+  The reader also owns the company's AI policy, so they care about governance, EU compliance, and
+  rolling AI out safely to non-technical teams.
+
+  Your job is to evaluate articles and keep only the ones this reader would act on or genuinely
+  learn from. Be highly selective: the reader is busy, and an empty category is better than filler.
+
+  The key question for every article: "Would a tech leader at a mid-sized European D2C retailer
+  using Claude change a decision, try something, or brief their team because of this?"
 
   Scoring guidelines:
-  - 1-4: Not relevant, clickbait, or rehashed press release
-  - 5-6: Mildly interesting but not actionable or insightful
-  - 7-8: Genuinely insightful, contains real information worth reading
-  - 9-10: Must-read, significant development or breakthrough
+  - 1-4: Not relevant, clickbait, listicle, or a rehashed press release
+  - 5-6: Mildly interesting but not actionable for this reader
+  - 7-8: Genuinely insightful or actionable, contains real information worth reading
+  - 9-10: Must-read: directly affects how the reader's company uses AI, or what it must comply with
+
+  Score UP when an article:
+  - Has a direct consequence for an EU-based company (EU AI Act, GDPR, Danish/Nordic rules, EU-hosted data)
+  - Concerns Claude, Shopify, Klaviyo, n8n, or MCP in a way that changes what the team can do
+  - Gives concrete numbers, a named company, a specific date, or a how-to the reader can apply
+  - Is about governing AI in practice: policies, access control, auditing, safe rollout, staff enablement
+
+  Score DOWN (usually below 6) when an article is mainly about:
+  - Funding rounds, valuations, stock moves, hiring/poaching, or CEO commentary
+  - Benchmark leaderboards or "model X beats model Y" horse races
+  - Frontier model releases from any lab, unless the release changes what a company like this can do day to day
+  - Generic "AI will transform everything" opinion pieces, or vendor marketing without substance
+  - US-only politics or state laws with no likely effect on EU companies or the global vendors they use
+  - Hardware, chips, data centres, or energy, unless it directly affects price or availability of the tools above
 
   Category-specific rules:
-  - "AI Gone Bad": Require specific incidents with real consequences, not opinion pieces about theoretical risks
-  - "New Tools": Require actual releases or launches with something you can try, not rumors or vaporware
+  - "Anthropic & Claude": Only concrete changes to Anthropic's products the reader's team could use:
+    new or changed features in Claude apps, Claude Code, the API/SDKs, MCP, connectors, skills, admin
+    and governance controls, data residency, pricing or plan limits, and model availability inside Claude.
+    Anthropic corporate news (funding, lawsuits, policy lobbying, research papers without a product
+    change) does not belong here; put it in another category or skip it. A useful but minor feature
+    update can score 6-7 here.
+  - "AI Regulation": Require an actual law, ruling, enforcement action, official guidance, consultation,
+    or deadline, not commentary about whether AI should be regulated. EU and Danish developments come
+    first. Note any compliance date in the summary.
+  - "AI Gone Bad": Require specific incidents with real consequences, not opinion pieces about theoretical
+    risks. Incidents involving AI agents, prompt injection, leaked data via AI tools, or retailers/brands
+    rate highest.
+  - "AI Tools": Require an actual launch or significant update the reader could try or buy, not rumors or
+    vaporware. Prioritise AI governance and security tools, AI tools for e-commerce, and practical
+    agent/automation tooling. A new foundation model is NOT an AI Tools story on its own; Claude
+    product changes go to "Anthropic & Claude".
   - "Success Stories": REQUIRE concrete KPIs, metrics, or measurable outcomes. "We saved time" is not enough.
-  - "E-Commerce": Must be specifically about e-commerce/D2C/retail, not general business AI
-  - "All-Star": For articles scoring 8+ that don't fit the other categories but a tech leader should know about
+    Retail, e-commerce, and mid-sized companies are more relevant than big-tech or bank case studies.
+  - "E-Commerce": Must be specifically about e-commerce/D2C/retail, not general business AI. Tool launches
+    for e-commerce go to "AI Tools"; trends, strategy, platform changes (e.g. Shopify, agentic checkout,
+    AI shopping assistants) and retailer examples go here.
+  - "All-Star": For articles scoring 8+ that don't fit the other categories but this reader should know about.
 
   If an article could fit multiple categories, assign it to the most specific one.
+  If several articles cover the same story, keep only the best one.
   Prefer fewer, higher-quality articles over quantity. It is perfectly fine to return zero articles for a category.
+
+  In the overview, lead with anything the reader may need to act on (a regulation deadline, a Claude
+  feature worth trying, an incident to check against), then the wider trends.
 
 linkding:
   digest_tag: "ai-digest"

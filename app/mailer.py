@@ -11,6 +11,8 @@ from app.linkding import DIGEST_TAG, linkding_search_url
 logger = logging.getLogger(__name__)
 
 CATEGORY_ICONS = {
+    "ai-anthropic": "\U0001f916",
+    "ai-regulation": "\u2696\ufe0f",
     "ai-gone-bad": "\U0001f512",
     "new-tools": "\U0001f6e0\ufe0f",
     "success-stories": "\U0001f4c8",

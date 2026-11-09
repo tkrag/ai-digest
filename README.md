@@ -15,8 +15,10 @@ Runs as a Docker container on Once (Hetzner). A scheduler triggers the digest pi
 
 | Key | Label | What it covers |
 |---|---|---|
+| `ai-anthropic` | Anthropic & Claude | New features and changes in Claude apps, Claude Code, API, MCP |
+| `ai-regulation` | AI Regulation | Laws, enforcement and official guidance, EU AI Act first |
 | `ai-gone-bad` | AI Gone Bad | Security breaches, compliance failures, bias incidents |
-| `new-tools` | New Tools | New AI tools, libraries, platforms, model releases |
+| `new-tools` | AI Tools | AI governance/security tools, e-commerce AI tools, agent tooling (not model releases) |
 | `success-stories` | Success Stories | Case studies with concrete KPIs and metrics |
 | `ai-ecommerce` | E-Commerce | AI in D2C e-commerce, personalization, logistics |
 | `all-star` | All-Star | Doesn't fit above but is highly relevant |
@@ -80,16 +82,18 @@ docker cp ./config.yaml <container>:/storage/config.yaml
 Add a block under `categories:` in `config.yaml`:
 
 ```yaml
-  ai-regulation:
-    label: "AI Regulation"
-    description: "New laws, policy proposals, and government actions around AI"
+  my-category:
+    label: "My Category"
+    description: "What belongs here (Claude sees this when classifying)"
     queries:
-      - "AI regulation law passed OR AI policy government"
-      - "AI act enforcement OR AI governance legislation"
+      - "brave news query one"
+      - "brave news query two"
     max_articles: 3
     min_relevance: 7
-    tags: ["ai-regulation"]
+    tags: ["my-category"]
 ```
+
+Optionally add an emoji for it to `CATEGORY_ICONS` in `app/mailer.py`, and a category rule to `scoring_prompt`.
 
 Then restart the container.
 
@@ -102,6 +106,8 @@ The `scoring_prompt:` field in `config.yaml` is the full instruction set Claude 
 1. Make changes and push to `main`
 2. Wait for the [GitHub Actions build](https://github.com/tkrag/ai-digest/actions) to go green (~2 min)
 3. Pull the latest image in the Once TUI
+
+**Note:** changes to `config.yaml` in the repo do not reach a running server on their own. The server keeps reading `/storage/config.yaml`, which was seeded on first boot. Copy the new file over it (see "Editing the config") and restart.
 
 ## Data
 

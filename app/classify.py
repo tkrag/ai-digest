@@ -102,7 +102,7 @@ async def classify_articles(articles: list[Article]) -> tuple[list[ScoredArticle
     try:
         response = await _get_client().messages.create(
             model="claude-sonnet-4-6",
-            max_tokens=4096,
+            max_tokens=8192,
             system=_build_system_prompt(),
             messages=[{"role": "user", "content": _build_user_prompt(articles)}],
         )
