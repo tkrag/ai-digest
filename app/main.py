@@ -6,7 +6,7 @@ from apscheduler.triggers.cron import CronTrigger
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 
-from app.config import DIGEST_HOUR, DIGEST_MINUTE
+from app.config import CONFIG, CONFIG_PATH, DIGEST_HOUR, DIGEST_MINUTE, GIT_SHA
 from app.digest import run_digest
 
 logging.basicConfig(
@@ -50,7 +50,13 @@ async def index():
     next_run = None
     if jobs and jobs[0].next_run_time:
         next_run = jobs[0].next_run_time.isoformat()
-    return {"service": "ai-digest", "next_run": next_run}
+    return {
+        "service": "ai-digest",
+        "version": GIT_SHA[:7],
+        "next_run": next_run,
+        "config_path": str(CONFIG_PATH),
+        "categories": list(CONFIG.get("categories", {})),
+    }
 
 
 @app.post("/run")

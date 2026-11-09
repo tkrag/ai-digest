@@ -11,7 +11,7 @@ _storage_dir = Path(os.getenv("STORAGE_DIR", "/storage"))
 _storage_config = _storage_dir / "config.yaml"
 
 
-def load_config() -> dict:
+def load_config() -> tuple[dict, Path]:
     if _storage_config.exists():
         path = _storage_config
     else:
@@ -24,7 +24,7 @@ def load_config() -> dict:
             pass  # storage not writable yet (e.g. first boot before mount)
 
     with open(path) as f:
-        return yaml.safe_load(f)
+        return yaml.safe_load(f), path
 
 
 def _int_env(key: str, default: str, lo: int, hi: int) -> int:
@@ -34,7 +34,8 @@ def _int_env(key: str, default: str, lo: int, hi: int) -> int:
     return val
 
 
-CONFIG = load_config()
+CONFIG, CONFIG_PATH = load_config()
+GIT_SHA = os.getenv("GIT_SHA", "dev")
 
 # All env vars use empty-string defaults so the app can boot for healthchecks
 # before env vars are configured. validate_config() checks them before use.

@@ -12,6 +12,9 @@ COPY app/ app/
 COPY entrypoint.sh .
 RUN chmod +x entrypoint.sh
 
+ARG GIT_SHA=dev
+ENV GIT_SHA=$GIT_SHA
+
 EXPOSE 80
 
 ENTRYPOINT ["/app/entrypoint.sh"]

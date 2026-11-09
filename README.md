@@ -51,7 +51,7 @@ GitHub Actions builds and pushes the image on every push to `main`. Make sure th
 | Method | Path | Purpose |
 |---|---|---|
 | `GET` | `/up` | Healthcheck (required by Once) |
-| `GET` | `/` | Service status + next scheduled run time |
+| `GET` | `/` | Service status: `version` (git commit of the image), next run time, `config_path` and the `categories` actually loaded |
 | `POST` | `/run` | Manually trigger a digest run |
 
 ## Editing the config
@@ -106,6 +106,7 @@ The `scoring_prompt:` field in `config.yaml` is the full instruction set Claude 
 1. Make changes and push to `main`
 2. Wait for the [GitHub Actions build](https://github.com/tkrag/ai-digest/actions) to go green (~2 min)
 3. Pull the latest image in the Once TUI
+4. Check `GET /`: `version` should match the first 7 characters of the commit you pushed
 
 **Note:** changes to `config.yaml` in the repo do not reach a running server on their own. The server keeps reading `/storage/config.yaml`, which was seeded on first boot. Copy the new file over it (see "Editing the config") and restart.
 
